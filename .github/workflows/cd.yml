@@ -16,6 +16,5 @@ jobs:
       - name: Docker login
         uses: docker/login-action@v4
         with:
-          username: $$ {{ vars.DOCKER_USERNAME }}
-          password: $$ {{ secrets.DOCKER_PASSWORD }}
-        
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
