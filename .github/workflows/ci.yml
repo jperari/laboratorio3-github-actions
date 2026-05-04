@@ -7,13 +7,23 @@ on:
   pull_request:
     branches: [ main ]
     paths: [ 'hangman-api/**' ]
+
 jobs:
-  audit:
-    runs-on: ubuntu-latest
+  buildAndTest:
+    strategy:
+      matrix:
+        node-version: [16, 17, 18]
+        os: [ubuntu-latest, ubuntu-slim]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Set up Node.js version
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
       - name: Build and test
         working-directory: ./hangman-api
         run: |
