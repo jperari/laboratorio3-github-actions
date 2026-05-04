@@ -45,6 +45,7 @@ jobs:
   bye:
     runs-on: ubuntu-latest
     needs: test
+    if: ${{ always() }}
 
     steps:
       - name: Bye
