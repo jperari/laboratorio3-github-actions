@@ -18,3 +18,9 @@ jobs:
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          push: true
+          tags: jperari766a/hangman-api-cep-grupo-b:latest
+          context: ./hangman-api
