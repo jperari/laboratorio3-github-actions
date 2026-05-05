@@ -11,7 +11,14 @@ Debes crear un nuevo workflow que se dispare cuando haya cambios en el proyecto 
 
 ### Comentarios
 
-1. Disparador:
+1. Eventos/Pasos/Actions
+   1. Eventos (Disparador): Pull Request con cambios en hangman-front/**
+   2. Pasos:
+      1. Checkout del repositorio → Configurar Node.js → Build (npm ci y npm run build)
+      2. Checkout del repositorio → Configurar Node.js → Ejecutar los unit tests (npm ci y npm test)
+   3. Actions: checkout@v6, setup-node@v6
+
+2. Disparador:
 
     Con el siguiente código se programa el flujo para ejecutarse cada vez que se haga un PR sobre cualquier rama y se modifique el contenido del proyecto frontend ubicado en la tura hangman-front, se podría limitar a main en nuestro caso porque la operativa será subir código desde ramas a main a través de PRs pero lo dejo abierto
 
@@ -22,7 +29,7 @@ Debes crear un nuevo workflow que se dispare cuando haya cambios en el proyecto 
         paths: [ 'hangman-front/**' ]
     ```
 
-2. Construcción del proyecto
+3. Construcción del proyecto
 
     En jobs se añade el job con nombre 'build' para bajar el código del repositorio y lanzar los comando de node.js para bajar dependencias y construir el proyecto
 
@@ -47,7 +54,7 @@ Debes crear un nuevo workflow que se dispare cuando haya cambios en el proyecto 
 
     ```
 
-3. Ejecución de los test unitarios
+4. Ejecución de los test unitarios
 
     Añadimos otro job para ejecutar las pruebas unitarias de forma similar al anterior
 
@@ -74,7 +81,7 @@ Debes crear un nuevo workflow que se dispare cuando haya cambios en el proyecto 
 
     **NOTA:** Utilizando dos jobs el proceso es más escalable pero consume más recursos, como los dos primeros steps son comunes, se podría añadir el último step del job 'test' al final de los steps del primer job. El tenerlos por separado hace que se creen dos instancias de ubuntu, se baje dos veces el código y se configure node.js y se bajen las dependencias dos veces.
 
-4. Evidencias de la ejecución
+5. Evidencias de la ejecución
 
 * Subo los cambios (solo ci-fontend.yml) y hago PR -> No se lanza el job
 * Modifico el fichero index.html y hago PR -> Se lanza el job aunque da un error al ejecutar los tests:
@@ -108,8 +115,51 @@ Nota: intenta usar las actions de Docker vistas en clase
 
 ### Comentarios
 
-## Ejercicio 3. Workflow para ejecutar tests E2E (opcional)
 
-Crea un workflow que se lance de la manera que elijas y ejecute los tests e2e que encontrarás en este enlace. Puedes usar Docker Compose o Cypress action para ejecutar los tests.
+1. Eventos/Pasos/Actions
+   1. Eventos (Disparador): workflow_dispatch (manual desde la pestaña Actions)
+   2. Pasos: Checkout → Get Docker version (opcional) → Docker login → Build y push
+   3. Actions: checkout@v6, docker/login-action@v4, docker/build-push-action@v7
 
-### Comentarios
+2. Disparador
+
+    ```yml
+    on:
+      workflow_dispatch:
+    ```
+
+3. Nuevo workflow
+
+    Flujo: `cd-frontend.yml`, similar al visto en clase cambiando a 'hangman-front'
+
+4. Docker login / Configuración de usuario y login a Docker
+
+   - Se configura las credenciales en el repositorio de GitHub
+
+        GitHub -> Setting -> [Security and quality] Secrets and variables -> Actions
+
+        ![alt text](capturas/ejercicio2/Credenciales_GitHub_1.png)
+        ![alt text](capturas/ejercicio2/Credenciales_GitHub_2.png)
+    
+    **NOTA**: Al generar el token en DockerHub es necesario establecer permisos de escritura para poder realizar el push de la imagen.
+  
+5. Build y push / Publicar la imagen
+
+    Se crea y publica la imagen utilizando la [acción para GitHub](https://github.com/docker/build-push-action) creada por Docker
+
+    ```yml
+    - name: Build y push
+            uses: docker/build-push-action@v7
+            with:
+            push: true
+            tags: jperari766a/hangman-front-cep-grupo-b:latest
+            context: ./hangman-front
+    ```
+
+6. Más evidencias
+
+![Ejecución manual](capturas/ejercicio2/Ejecución_manual_job_1.png)
+![Salida ejecución manual](capturas/ejercicio2/Ejecución_manual_job_2.png)
+![Imagen en DockerHub](capturas/ejercicio2/Imagen_en_DockerHub.png)
+
+
